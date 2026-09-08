@@ -1,0 +1,32 @@
+# Copy to ~/.gitconfig only if that file does not already exist, then fill in name/email.
+# Overwriting a live ~/.gitconfig would clobber identity and signing settings.
+# Do not commit the live ~/.gitconfig.
+
+[user]
+	name = Your Name
+	email = YOUR_GITHUB_NOREPLY@users.noreply.github.com
+	# signingkey = ~/.ssh/id_ed25519.pub
+
+[init]
+	defaultBranch = main
+
+[pull]
+	rebase = true
+
+[push]
+	autoSetupRemote = true
+
+# Prefer SSH when a GitHub HTTPS URL is pasted or cloned.
+[url "git@github.com:"]
+	insteadOf = https://github.com/
+
+# Optional: different identity for work checkouts.
+# [includeIf "gitdir:~/Projects/work/"]
+# 	path = ~/.config/git/work.gitconfig
+
+# Optional: sign commits with the same Ed25519 SSH key GitHub uses.
+# Add the public key on GitHub as a Signing key, then uncomment user.signingkey above and:
+# [gpg]
+# 	format = ssh
+# [commit]
+# 	gpgsign = true

@@ -1,0 +1,16 @@
+.DS_Store
+
+# Live identity and keys — never copy these into the repo
+.gitconfig
+.ssh/
+.zsh_history
+.zhistory
+.env
+.env.*
+!.env.example
+
+# SSH keys, including named variants like id_ed25519_work / id_ed25519_work.pub
+id_ed25519*
+id_rsa*
+id_ecdsa*
+id_dsa*
