@@ -1,0 +1,12 @@
+# Ghostty — Catppuccin Mocha
+# Reload: Cmd+Shift+,   Docs: https://ghostty.org/docs/config
+
+theme = Catppuccin Mocha
+font-family = JetBrainsMono Nerd Font Mono
+font-size = 14
+
+window-padding-x = 12
+window-padding-y = 10
+background-opacity = 0.95
+background-blur = true
+macos-titlebar-style = tabs
