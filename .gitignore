@@ -1,0 +1,9 @@
+.DS_Store
+
+# Live identity and keys — never copy these into the repo
+.gitconfig
+.ssh/
+id_ed25519
+id_ed25519.pub
+id_rsa
+id_rsa.pub

@@ -25,6 +25,7 @@ This repo stores the config files and a Brewfile so you can recreate the same se
 Brewfile                 # Homebrew packages + casks
 zshrc                    # → ~/.zshrc
 zprofile                 # → ~/.zprofile
+.gitconfig.example       # copy to ~/.gitconfig (fill in name/email)
 config/
   ghostty/config         # → ~/.config/ghostty/config
   starship.toml          # → ~/.config/starship.toml
@@ -102,6 +103,14 @@ cp ~/.zshrc ~/.zshrc.bak 2>/dev/null
 cp ~/.zprofile ~/.zprofile.bak 2>/dev/null
 ```
 
+Git config is **not** symlinked. Copy the example, then put your real name and email in `~/.gitconfig` (GitHub → **Settings → Emails** shows your `noreply` address):
+
+```bash
+cp .gitconfig.example ~/.gitconfig
+```
+
+Do not commit `~/.gitconfig`. Use a work address only on work machines, and only if that address is verified on the GitHub account that will receive the commits.
+
 ### 4. Install Catppuccin for bat
 
 ```bash
@@ -176,6 +185,17 @@ git status
 git commit -m "Update terminal configs"
 git push
 ```
+
+Do **not** copy `~/.gitconfig` or anything under `~/.ssh/` into this repo. Those files hold your email and private key.
+
+## Security and privacy
+
+- **Identity stays local.** `.gitconfig.example` is the template. Copy it to `~/.gitconfig` and fill in `user.name` / `user.email`; never commit the live file.
+- **Work email on personal repos.** Commits using an employer domain are public on GitHub and can link this account to work. Prefer GitHub’s noreply address for personal projects; use `[includeIf]` if work and personal checkouts need different emails.
+- **SSH keys.** Generate a per-machine Ed25519 key. Never commit `id_ed25519` (private) or reuse one private key across machines. The `.pub` file is not secret, but the comment often contains your email — that is already on GitHub once you upload the key.
+- **HTTPS vs SSH.** The shared Git config rewrites `https://github.com/` to SSH so clones use your key instead of a password or token prompt.
+- **Shell history.** `HIST_IGNORE_SPACE` is on: prefix a command with a space if it contains a token or password. Assume `~/.zsh_history` is sensitive; do not copy it into the repo.
+- **`git add -A`.** Review `git status` before commit so a stray key, `.env`, or live `.gitconfig` does not land in history.
 
 ## License
 
