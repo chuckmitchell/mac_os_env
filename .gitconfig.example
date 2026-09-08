@@ -1,5 +1,6 @@
-# Copy to ~/.gitconfig and fill in name/email.
-# Do not commit the live ~/.gitconfig (it contains your identity).
+# Copy to ~/.gitconfig only if that file does not already exist, then fill in name/email.
+# Overwriting a live ~/.gitconfig would clobber identity and signing settings.
+# Do not commit the live ~/.gitconfig.
 
 [user]
 	name = Your Name

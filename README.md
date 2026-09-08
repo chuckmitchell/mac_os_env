@@ -96,17 +96,22 @@ cp config/starship.toml ~/.config/starship.toml
 cp config/bat/config ~/.config/bat/config
 ```
 
-If you already have a `.zshrc` / `.zprofile`, back them up first:
+If you already have a `.zshrc` / `.zprofile` / `.gitconfig`, back them up first:
 
 ```bash
 cp ~/.zshrc ~/.zshrc.bak 2>/dev/null
 cp ~/.zprofile ~/.zprofile.bak 2>/dev/null
+cp ~/.gitconfig ~/.gitconfig.bak 2>/dev/null
 ```
 
-Git config is **not** symlinked. Copy the example, then put your real name and email in `~/.gitconfig` (GitHub → **Settings → Emails** shows your `noreply` address):
+Git config is **not** symlinked. Install the example only when `~/.gitconfig` is missing — never overwrite a live file (it holds your name, email, and signing key). Then fill in name and email (GitHub → **Settings → Emails** shows your `noreply` address):
 
 ```bash
-cp .gitconfig.example ~/.gitconfig
+if [ -e ~/.gitconfig ]; then
+  echo "Keeping existing ~/.gitconfig (not overwritten). Merge any new keys from .gitconfig.example by hand."
+else
+  cp .gitconfig.example ~/.gitconfig
+fi
 ```
 
 Do not commit `~/.gitconfig`. Use a work address only on work machines, and only if that address is verified on the GitHub account that will receive the commits.
@@ -190,7 +195,7 @@ Do **not** copy `~/.gitconfig` or anything under `~/.ssh/` into this repo. Those
 
 ## Security and privacy
 
-- **Identity stays local.** `.gitconfig.example` is the template. Copy it to `~/.gitconfig` and fill in `user.name` / `user.email`; never commit the live file.
+- **Identity stays local.** `.gitconfig.example` is the template. Copy it to `~/.gitconfig` only if that file is missing; never overwrite a live config, and never commit it.
 - **Work email on personal repos.** Commits using an employer domain are public on GitHub and can link this account to work. Prefer GitHub’s noreply address for personal projects; use `[includeIf]` if work and personal checkouts need different emails.
 - **SSH keys.** Generate a per-machine Ed25519 key. Never commit `id_ed25519` (private) or reuse one private key across machines. The `.pub` file is not secret, but the comment often contains your email — that is already on GitHub once you upload the key.
 - **HTTPS vs SSH.** The shared Git config rewrites `https://github.com/` to SSH so clones use your key instead of a password or token prompt.
