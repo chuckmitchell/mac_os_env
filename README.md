@@ -74,10 +74,10 @@ That installs Ghostty, JetBrains Mono Nerd Font, Starship, fzf, zoxide, eza, and
 
 ### 2b. Install mise (official binary, not Homebrew)
 
-Homebrew’s `mise` formula is slower and larger. Install the optimized binary from [mise.run](https://mise.run). The default CDN (`mise.jdx.dev`) often returns **403** on this network; pull the same release from GitHub:
+Homebrew’s `mise` formula is slower and larger. Use the binary from [mise.run](https://mise.run):
 
 ```bash
-curl https://mise.run | MISE_INSTALL_FROM_GITHUB=1 sh
+curl https://mise.run | sh
 ```
 
 That puts the binary at `~/.local/bin/mise` (already on `PATH` via `zshrc`). Activation is already in `zshrc`:
@@ -92,7 +92,7 @@ Open a new tab, then:
 mise --version
 ```
 
-If GitHub is also blocked, download the macOS ARM tarball from [jdx/mise releases](https://github.com/jdx/mise/releases) and extract `mise` to `~/.local/bin/mise`.
+If that download is blocked, see [Zscaler workarounds](#zscaler-workarounds).
 
 ### 3. Link (or copy) config files
 
@@ -171,6 +171,8 @@ npm -v
 
 `mise` is activated in `zshrc` (`eval "$(mise activate zsh)"`). New shells pick it up automatically. In the current tab, `eval "$(mise activate zsh)"` then `mise install`.
 
+If `mise install` fails with **403** on a `.tar.gz`, see [Zscaler workarounds](#zscaler-workarounds).
+
 Per-project versions (optional):
 
 ```bash
@@ -179,29 +181,6 @@ mise use node@22
 ```
 
 That writes a `mise.toml` in the project so that directory uses Node 22.
-
-#### Zscaler: `mise install` 403 on `.tar.gz`
-
-If Node’s `.tar.gz` is blocked, install the same version as `.tar.xz` into mise’s install dir. Check [nodejs.org/dist](https://nodejs.org/dist/) if `24.21.0` is stale.
-
-```bash
-VER=24.21.0
-FILE="node-v${VER}-darwin-arm64.tar.xz"
-TMP=$(mktemp -d) && cd "$TMP"
-
-curl -fLO "https://nodejs.org/dist/v${VER}/${FILE}"
-curl -fLO "https://nodejs.org/dist/v${VER}/SHASUMS256.txt"
-grep "  ${FILE}\$" SHASUMS256.txt | shasum -a 256 -c -
-
-DEST="$HOME/.local/share/mise/installs/node/${VER}"
-mkdir -p "$DEST"
-tar -xJf "$FILE" -C "$DEST" --strip-components=1
-
-node -v
-npm -v
-```
-
-When LTS moves, repeat with the new `VER`.
 
 ### 6. Open Ghostty and reload
 
@@ -237,6 +216,43 @@ bat ~/.zshrc
 | `cd ~/Desktop` then `z Desk` | zoxide jump |
 | `cat ~/.zshrc` | same as `bat` (alias) |
 | `node -v` | Node LTS from mise |
+
+## Zscaler workarounds
+
+Use these only if the normal commands above fail with **403**.
+
+### mise.run is blocked
+
+The installer script loads, then the binary download from `mise.jdx.dev` is refused. Fetch the same release from GitHub:
+
+```bash
+curl https://mise.run | MISE_INSTALL_FROM_GITHUB=1 sh
+```
+
+If GitHub is also blocked, download the macOS ARM tarball from [jdx/mise releases](https://github.com/jdx/mise/releases) and extract `mise` to `~/.local/bin/mise`.
+
+### Node `.tar.gz` is blocked
+
+mise fetches `node-*-darwin-arm64.tar.gz`. If that 403s, install the same version as `.tar.xz` into mise’s install dir. Check [nodejs.org/dist](https://nodejs.org/dist/) if `24.21.0` is stale.
+
+```bash
+VER=24.21.0
+FILE="node-v${VER}-darwin-arm64.tar.xz"
+TMP=$(mktemp -d) && cd "$TMP"
+
+curl -fLO "https://nodejs.org/dist/v${VER}/${FILE}"
+curl -fLO "https://nodejs.org/dist/v${VER}/SHASUMS256.txt"
+grep "  ${FILE}\$" SHASUMS256.txt | shasum -a 256 -c -
+
+DEST="$HOME/.local/share/mise/installs/node/${VER}"
+mkdir -p "$DEST"
+tar -xJf "$FILE" -C "$DEST" --strip-components=1
+
+node -v
+npm -v
+```
+
+When LTS moves, repeat with the new `VER`.
 
 ## Day-to-day notes
 
