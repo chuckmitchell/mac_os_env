@@ -1,0 +1,3 @@
+# Global mise tools. Docs: https://mise.jdx.dev/configuration.html
+[tools]
+node = "lts"

@@ -2,7 +2,7 @@
 
 Personal macOS terminal stack:
 
-**Ghostty → zsh → Starship → Catppuccin Mocha → fzf + zoxide + eza + bat**
+**Ghostty → zsh → Starship → Catppuccin Mocha → fzf + zoxide + eza + bat → mise (Node)**
 
 This repo stores the config files and a Brewfile so you can recreate the same setup on another Mac.
 
@@ -18,6 +18,7 @@ This repo stores the config files and a Brewfile so you can recreate the same se
 | [zoxide](https://github.com/ajeetdsouza/zoxide) | Smart `cd` via `z` |
 | [eza](https://eza.rocks) | Modern `ls` with icons / git column |
 | [bat](https://github.com/sharkdp/bat) | Syntax-highlighted `cat` |
+| [mise](https://mise.jdx.dev) | Runtime version manager (Node LTS globally) |
 
 ## Repo layout
 
@@ -30,6 +31,7 @@ config/
   ghostty/config         # → ~/.config/ghostty/config
   starship.toml          # → ~/.config/starship.toml
   bat/config             # → ~/.config/bat/config
+  mise/config.toml       # → ~/.config/mise/config.toml
 ```
 
 The Catppuccin theme file for `bat` is downloaded during setup (not stored here). Ghostty and Starship get Mocha from built-in / config palette.
@@ -70,6 +72,28 @@ brew bundle --file=./Brewfile
 
 That installs Ghostty, JetBrains Mono Nerd Font, Starship, fzf, zoxide, eza, and bat.
 
+### 2b. Install mise (official binary, not Homebrew)
+
+Homebrew’s `mise` formula is slower and larger. Use the binary from [mise.run](https://mise.run):
+
+```bash
+curl https://mise.run | sh
+```
+
+That puts the binary at `~/.local/bin/mise` (already on `PATH` via `zshrc`). Activation is already in `zshrc`:
+
+```zsh
+eval "$(mise activate zsh)"
+```
+
+Open a new tab, then:
+
+```bash
+mise --version
+```
+
+If that download is blocked, see [Zscaler workarounds](#zscaler-workarounds).
+
 ### 3. Link (or copy) config files
 
 **Option A — symlink** (edits in the repo update your live config):
@@ -78,10 +102,11 @@ That installs Ghostty, JetBrains Mono Nerd Font, Starship, fzf, zoxide, eza, and
 ln -sf "$PWD/zshrc" ~/.zshrc
 ln -sf "$PWD/zprofile" ~/.zprofile
 
-mkdir -p ~/.config/ghostty ~/.config/bat
+mkdir -p ~/.config/ghostty ~/.config/bat ~/.config/mise
 ln -sf "$PWD/config/ghostty/config" ~/.config/ghostty/config
 ln -sf "$PWD/config/starship.toml" ~/.config/starship.toml
 ln -sf "$PWD/config/bat/config" ~/.config/bat/config
+ln -sf "$PWD/config/mise/config.toml" ~/.config/mise/config.toml
 ```
 
 **Option B — copy** (independent files on the new machine):
@@ -90,10 +115,11 @@ ln -sf "$PWD/config/bat/config" ~/.config/bat/config
 cp zshrc ~/.zshrc
 cp zprofile ~/.zprofile
 
-mkdir -p ~/.config/ghostty ~/.config/bat
+mkdir -p ~/.config/ghostty ~/.config/bat ~/.config/mise
 cp config/ghostty/config ~/.config/ghostty/config
 cp config/starship.toml ~/.config/starship.toml
 cp config/bat/config ~/.config/bat/config
+cp config/mise/config.toml ~/.config/mise/config.toml
 ```
 
 If you already have a `.zshrc` / `.zprofile` / `.gitconfig`, back them up first:
@@ -133,7 +159,30 @@ Confirm:
 bat --list-themes | grep -i catppuccin
 ```
 
-### 5. Open Ghostty and reload
+### 5. Install Node with mise
+
+`config/mise/config.toml` requests **Node LTS** globally (`node = "lts"`). After the config is linked:
+
+```bash
+mise install
+node -v
+npm -v
+```
+
+`mise` is activated in `zshrc` (`eval "$(mise activate zsh)"`). New shells pick it up automatically. In the current tab, `eval "$(mise activate zsh)"` then `mise install`.
+
+If `mise install` fails with **403** on a `.tar.gz`, see [Zscaler workarounds](#zscaler-workarounds).
+
+Per-project versions (optional):
+
+```bash
+cd ~/path/to/project
+mise use node@22
+```
+
+That writes a `mise.toml` in the project so that directory uses Node 22.
+
+### 6. Open Ghostty and reload
 
 1. Open **Ghostty** from `/Applications` (or Spotlight).
 2. Reload config with **`⌘⇧,`**, or quit and reopen.
@@ -145,7 +194,7 @@ You should see:
 - JetBrains Mono Nerd Font
 - Starship prompt (`❯`, lavender path, mauve git branch in repos)
 
-### 6. Smoke test
+### 7. Smoke test
 
 ```bash
 starship --version
@@ -153,6 +202,8 @@ fzf --version
 zoxide --version
 eza --version
 bat --version
+mise --version
+node -v     # Node LTS via mise
 
 ls          # eza with icons
 ll          # long list + git status column in a repo
@@ -164,6 +215,44 @@ bat ~/.zshrc
 | `Ctrl+R` | fzf history search |
 | `cd ~/Desktop` then `z Desk` | zoxide jump |
 | `cat ~/.zshrc` | same as `bat` (alias) |
+| `node -v` | Node LTS from mise |
+
+## Zscaler workarounds
+
+Use these only if the normal commands above fail with **403**.
+
+### mise.run is blocked
+
+The installer script loads, then the binary download from `mise.jdx.dev` is refused. Fetch the same release from GitHub:
+
+```bash
+curl https://mise.run | MISE_INSTALL_FROM_GITHUB=1 sh
+```
+
+If GitHub is also blocked, download the macOS ARM tarball from [jdx/mise releases](https://github.com/jdx/mise/releases) and extract `mise` to `~/.local/bin/mise`.
+
+### Node `.tar.gz` is blocked
+
+mise fetches `node-*-darwin-arm64.tar.gz`. If that 403s, install the same version as `.tar.xz` into mise’s install dir. Check [nodejs.org/dist](https://nodejs.org/dist/) if `24.21.0` is stale.
+
+```bash
+VER=24.21.0
+FILE="node-v${VER}-darwin-arm64.tar.xz"
+TMP=$(mktemp -d) && cd "$TMP"
+
+curl -fLO "https://nodejs.org/dist/v${VER}/${FILE}"
+curl -fLO "https://nodejs.org/dist/v${VER}/SHASUMS256.txt"
+grep "  ${FILE}\$" SHASUMS256.txt | shasum -a 256 -c -
+
+DEST="$HOME/.local/share/mise/installs/node/${VER}"
+mkdir -p "$DEST"
+tar -xJf "$FILE" -C "$DEST" --strip-components=1
+
+node -v
+npm -v
+```
+
+When LTS moves, repeat with the new `VER`.
 
 ## Day-to-day notes
 
@@ -184,6 +273,7 @@ cp ~/.zprofile zprofile
 cp ~/.config/ghostty/config config/ghostty/config
 cp ~/.config/starship.toml config/starship.toml
 cp ~/.config/bat/config config/bat/config
+cp ~/.config/mise/config.toml config/mise/config.toml
 
 git add -A
 git status
