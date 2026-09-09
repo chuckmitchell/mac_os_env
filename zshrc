@@ -21,6 +21,9 @@ setopt AUTO_CD                # `~/Projects` without typing cd
 setopt INTERACTIVE_COMMENTS   # allow # comments in the shell
 bindkey -e                    # emacs keys (Ctrl+A / Ctrl+E)
 
+# --- mise (Node and other runtimes) ---
+eval "$(mise activate zsh)"
+
 # --- Prompt ---
 eval "$(starship init zsh)"
 
